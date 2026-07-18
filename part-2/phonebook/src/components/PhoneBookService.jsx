@@ -13,15 +13,14 @@ const addNew = (newPerson) => {
 };
 
 const updatePerson = (targetPerson, changePerson) => {
-  return axios
-    .put(`http://localhost:3001/persons/${targetPerson.id}`, changePerson)
-    .then((res) => res.data);
+  return axios.put(`${baseUrl}${targetPerson.id}`, changePerson).then((res) => {
+    res.data;
+  });
 };
 
 const removePerson = (id) => {
   return axios.delete(`${baseUrl}${id}`).then((res) => {
-    // console.log(res.data, res.status, "successfully removed");
-    return res.data;
+    return res.status;
   });
 };
 

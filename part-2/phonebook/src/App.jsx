@@ -45,7 +45,6 @@ function App() {
 
       PhoneBookService.updatePerson(targetPerson, changePerson)
         .then((updatedPerson) => {
-          // console.log(updatedPerson, "successfully updated");
           setPersons(
             persons.map((p) => (p.id === updatedPerson.id ? updatedPerson : p)),
           );
@@ -56,7 +55,6 @@ function App() {
             `Information of ${targetPerson.name} has already been removed from server`,
           );
         });
-      // alert(`${newName} is already added to phonebook`);
       setNewName("");
       setNewNumber("");
       return;

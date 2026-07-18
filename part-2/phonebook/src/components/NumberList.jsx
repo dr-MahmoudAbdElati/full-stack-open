@@ -8,9 +8,12 @@ const NumberList = ({ persons, setPersons }) => {
       if (
         window.confirm("❌Are you sure your want to delete that person ❓❗")
       ) {
-        PhoneBookService.removePerson(id).then((data) =>
-          setPersons(persons.filter((p) => p.id !== data.id)),
-        );
+        PhoneBookService.removePerson(id)
+          .then((status) => {
+            if (status === 204)
+              setPersons(persons.filter((p) => p.id !== person.id));
+          })
+          .catch((err) => console.log(err));
       }
       return;
     };
