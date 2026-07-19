@@ -3,7 +3,7 @@ const cors = require("cors");
 const morgan = require("morgan");
 
 const app = express();
-const port = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3001;
 
 let persons = [
   {
@@ -47,6 +47,10 @@ morgan.token("body", (req) => {
 app.use(
   morgan(":method :url :status :res[content-length] - :response-time ms :body"),
 );
+
+app.get("/", (request, response) => {
+  response.send("Phonebook API is running");
+});
 
 app.get("/info", (req, res) => {
   const personsCount = persons.length;
@@ -107,6 +111,6 @@ app.delete("/api/persons/:id", (req, res) => {
   res.status(204).end();
 });
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+app.listen(PORT, () => {
+  console.log(`Server running on PORT ${PORT}`);
 });
