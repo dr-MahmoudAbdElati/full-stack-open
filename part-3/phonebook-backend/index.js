@@ -1,5 +1,4 @@
 const express = require("express");
-const cors = require("cors");
 const morgan = require("morgan");
 
 const app = express();
@@ -36,8 +35,6 @@ const generateId = () => {
   return String(id);
 };
 
-app.use(cors());
-
 app.use(express.json());
 
 morgan.token("body", (req) => {
@@ -47,10 +44,6 @@ morgan.token("body", (req) => {
 app.use(
   morgan(":method :url :status :res[content-length] - :response-time ms :body"),
 );
-
-app.get("/", (request, response) => {
-  response.send("Phonebook API is running");
-});
 
 app.get("/info", (req, res) => {
   const personsCount = persons.length;
@@ -62,11 +55,9 @@ app.get("/info", (req, res) => {
     <p>${requestTime}</p>
     `);
 });
-
 app.get("/api/persons", (req, res) => {
   res.json(persons);
 });
-
 app.get("/api/persons/:id", (req, res) => {
   const id = req.params.id;
   const person = persons.find((p) => p.id === id);
@@ -80,7 +71,6 @@ app.get("/api/persons/:id", (req, res) => {
 
   res.status(200).json(person);
 });
-
 app.post("/api/persons", (req, res) => {
   const body = req.body;
 
@@ -104,12 +94,13 @@ app.post("/api/persons", (req, res) => {
 
   res.json(newPerson);
 });
-
 app.delete("/api/persons/:id", (req, res) => {
   const id = req.params.id;
   persons = persons.filter((p) => p.id !== id);
   res.status(204).end();
 });
+
+app.use(express.static("dist"));
 
 app.listen(PORT, () => {
   console.log(`Server running on PORT ${PORT}`);
