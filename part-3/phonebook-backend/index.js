@@ -3,6 +3,8 @@ const express = require("express");
 const morgan = require("morgan");
 const Person = require("./models/person");
 
+const connectToDatabase = Person.connectToDatabase;
+
 const app = express();
 
 const generateId = () => {
@@ -80,6 +82,14 @@ app.delete("/api/persons/:id", (req, res) => {
 app.use(express.static("dist"));
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`Server running on PORT ${PORT}`);
-});
+
+connectToDatabase()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server running on PORT ${PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.error("MongoDB connection failed:", error.message);
+    process.exit(1);
+  });
