@@ -1,31 +1,9 @@
+require("dotenv").config();
 const express = require("express");
 const morgan = require("morgan");
+const Person = require("./models/person");
 
 const app = express();
-const PORT = process.env.PORT || 3001;
-
-let persons = [
-  {
-    id: "1",
-    name: "Arto Hellas",
-    number: "040-123456",
-  },
-  {
-    id: "2",
-    name: "Ada Lovelace",
-    number: "39-44-5323523",
-  },
-  {
-    id: "3",
-    name: "Dan Abramov",
-    number: "12-43-234345",
-  },
-  {
-    id: "4",
-    name: "Mary Poppendieck",
-    number: "39-23-6423122",
-  },
-];
 
 const generateId = () => {
   let id;
@@ -56,7 +34,9 @@ app.get("/info", (req, res) => {
     `);
 });
 app.get("/api/persons", (req, res) => {
-  res.json(persons);
+  Person.find({}).then((returnedPersons) => {
+    res.json(returnedPersons);
+  });
 });
 app.get("/api/persons/:id", (req, res) => {
   const id = req.params.id;
@@ -72,27 +52,24 @@ app.get("/api/persons/:id", (req, res) => {
   res.status(200).json(person);
 });
 app.post("/api/persons", (req, res) => {
-  const body = req.body;
+  const name = req.body.name;
+  const number = req.body.number;
 
-  if (!body.name || !body.number)
+  if (!name || !number)
     return res.status(400).json({ error: "name or number is missing" });
 
-  const newPerson = {
-    id: generateId(),
-    name: body.name,
-    number: body.number,
-  };
+  const newPerson = new Person({ name, number });
 
-  const duplicateName = persons.find((p) => p.name === newPerson.name);
-
-  if (duplicateName)
-    return res.status(400).json({
-      error: "name must be unique, that person already exists in the phonebook",
+  newPerson
+    .save()
+    .then((savedPerson) => {
+      console.log(`saved ${savedPerson.name} successfully`);
+      res.json(savedPerson);
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(400).json({ error: error.message });
     });
-
-  persons = persons.concat(newPerson);
-
-  res.json(newPerson);
 });
 app.delete("/api/persons/:id", (req, res) => {
   const id = req.params.id;
@@ -102,6 +79,7 @@ app.delete("/api/persons/:id", (req, res) => {
 
 app.use(express.static("dist"));
 
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server running on PORT ${PORT}`);
 });
