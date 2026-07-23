@@ -13,9 +13,9 @@ const addNew = (newPerson) => {
 };
 
 const updatePerson = (targetPerson, changePerson) => {
-  return axios.put(`${baseUrl}${targetPerson.id}`, changePerson).then((res) => {
-    res.data;
-  });
+  return axios
+    .put(`${baseUrl}${targetPerson.id}`, changePerson)
+    .then((res) => res.data);
 };
 
 const removePerson = (id) => {

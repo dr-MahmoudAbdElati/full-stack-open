@@ -28,31 +28,30 @@ function App() {
     e.preventDefault();
 
     const newPerson = {
-      name: newName,
-      number: newNumber,
+      name: newName.trim(),
+      number: newNumber.trim(),
     };
 
-    if (
-      persons.some(
-        (person) => person.name.toLowerCase() === newName.toLowerCase(),
-      ) &&
-      window.confirm(
-        "Are you sure you want to update; That person is already in the phonebook",
-      )
-    ) {
-      const targetPerson = persons.find((p) => p.name === newPerson.name);
-      const changePerson = { ...targetPerson, number: newPerson.number };
+    const existingPerson = persons.find(
+      (person) => person.name.toLowerCase() === newPerson.name.toLowerCase(),
+    );
 
-      PhoneBookService.updatePerson(targetPerson, changePerson)
+    if (existingPerson && window.confirm("Are you sure you want to update; That person is already in the phonebook")) {
+      const changePerson = { ...existingPerson, number: newPerson.number };
+
+      PhoneBookService.updatePerson(existingPerson, changePerson)
         .then((updatedPerson) => {
-          setPersons(
-            persons.map((p) => (p.id === updatedPerson.id ? updatedPerson : p)),
+          setPersons((prevPersons) =>
+            prevPersons.map((person) =>
+              person.id === updatedPerson.id ? updatedPerson : person,
+            ),
           );
           setErrMessage(`Updated ${updatedPerson.name} successfully`);
         })
         .catch((err) => {
+          console.error(err);
           setErrMessage(
-            `Information of ${targetPerson.name} has already been removed from server`,
+            `Information of ${existingPerson.name} could not be updated`,
           );
         });
       setNewName("");
@@ -61,7 +60,7 @@ function App() {
     }
 
     PhoneBookService.addNew(newPerson).then((addedPerson) => {
-      setPersons(persons.concat(addedPerson));
+      setPersons((prevPersons) => prevPersons.concat(addedPerson));
       setErrMessage(`Added ${addedPerson.name} successfully`);
     });
 

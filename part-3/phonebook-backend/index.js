@@ -3,9 +3,9 @@ const express = require("express");
 const morgan = require("morgan");
 const Person = require("./models/person");
 
-const connectToDatabase = Person.connectToDatabase;
-
 const app = express();
+
+const connectToDatabase = Person.connectToDatabase;
 
 const generateId = () => {
   let id;
@@ -14,13 +14,18 @@ const generateId = () => {
   } while (persons.some((p) => p.id === id));
   return String(id);
 };
-
-app.use(express.json());
-
 morgan.token("body", (req) => {
   return JSON.stringify(req.body);
 });
+const errorHandler = (error, request, response, next) => {
+  if (error.name === "CastError")
+    return response.status(400).send({ error: "malformatted id" });
 
+  next(error);
+};
+
+app.use(express.static("dist"));
+app.use(express.json());
 app.use(
   morgan(":method :url :status :res[content-length] - :response-time ms :body"),
 );
@@ -42,21 +47,16 @@ app.get("/api/persons", (req, res) => {
 });
 app.get("/api/persons/:id", (req, res) => {
   const id = req.params.id;
-  const person = persons.find((p) => p.id === id);
-  if (!person)
-    return res
-      .status(404)
-      .json({
-        error: "that person wasn not found",
-      })
-      .end();
+  Person.findById(id).then((result) => {
+    if (result) return res.status(200).json(result);
 
-  res.status(200).json(person);
+    res.status(404).json({
+      error: "person not found",
+    });
+  });
 });
 app.post("/api/persons", (req, res) => {
-  const name = req.body.name;
-  const number = req.body.number;
-
+  const { name, number } = req.body;
   if (!name || !number)
     return res.status(400).json({ error: "name or number is missing" });
 
@@ -73,16 +73,52 @@ app.post("/api/persons", (req, res) => {
       res.status(400).json({ error: error.message });
     });
 });
-app.delete("/api/persons/:id", (req, res) => {
+app.delete("/api/persons/:id", (req, res, next) => {
   const id = req.params.id;
-  persons = persons.filter((p) => p.id !== id);
-  res.status(204).end();
+  Person.findByIdAndDelete(id)
+    .then((result) => {
+      res.status(204).end();
+    })
+    .catch((error) => {
+      console.log(error);
+      next(error);
+    });
 });
 
-app.use(express.static("dist"));
+app.put("/api/persons/:id", (req, res, next) => {
+  const id = req.params.id;
+  const { name, number } = req.body;
+
+  if (!name || !number) {
+    return res.status(400).json({ error: "name or number is missing" });
+  }
+
+  Person.findByIdAndUpdate(
+    id,
+    { name, number },
+    { returnDocument: "after", runValidators: true, context: "query" },
+  )
+    .then((updatedPerson) => {
+      if (updatedPerson) {
+        console.log(updatedPerson);
+        res.status(200).json(updatedPerson);
+      } else {
+        res.status(404).json({ error: "person not found" });
+      }
+    })
+    .catch((error) => {
+      next(error);
+    });
+});
+
+const unknownMiddleware = (req, res) => {
+  res.status(404).send({ error: "endpoint not found" });
+};
+app.use(unknownMiddleware);
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3001;
-
 connectToDatabase()
   .then(() => {
     app.listen(PORT, () => {
