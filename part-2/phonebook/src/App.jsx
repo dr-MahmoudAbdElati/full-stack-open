@@ -36,7 +36,13 @@ function App() {
       (person) => person.name.toLowerCase() === newPerson.name.toLowerCase(),
     );
 
-    if (existingPerson && window.confirm("Are you sure you want to update; That person is already in the phonebook")) {
+    // update existing person
+    if (
+      existingPerson &&
+      window.confirm(
+        "Are you sure you want to update; That person is already in the phonebook",
+      )
+    ) {
       const changePerson = { ...existingPerson, number: newPerson.number };
 
       PhoneBookService.updatePerson(existingPerson, changePerson)
@@ -59,10 +65,15 @@ function App() {
       return;
     }
 
-    PhoneBookService.addNew(newPerson).then((addedPerson) => {
-      setPersons((prevPersons) => prevPersons.concat(addedPerson));
-      setErrMessage(`Added ${addedPerson.name} successfully`);
-    });
+    // add new person
+    PhoneBookService.addNew(newPerson)
+      .then((addedPerson) => {
+        setPersons((prevPersons) => prevPersons.concat(addedPerson));
+        setErrMessage(`Added ${addedPerson.name} successfully`);
+      })
+      .catch((error) => {
+        setErrMessage(error.response.data.error);
+      });
 
     setNewName("");
     setNewNumber("");
