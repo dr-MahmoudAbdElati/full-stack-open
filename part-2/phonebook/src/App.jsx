@@ -57,7 +57,7 @@ function App() {
         .catch((err) => {
           console.error(err);
           setErrMessage(
-            `Information of ${existingPerson.name} could not be updated`,
+            `Information of ${existingPerson.name} could not be updated. Error: ${err.response.data.error}`,
           );
         });
       setNewName("");
