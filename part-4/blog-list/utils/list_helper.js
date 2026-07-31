@@ -16,24 +16,25 @@ const favoriteBlog = (blogs) => {
 const mostBlogs = (blogs) => {
   if (blogs.length === 0) return 0;
 
-  const totalBlogs = (blogs, name) => {
+  const totalBlogsByName = (blogs, name) => {
     const reducer = (sum, blog) => {
       return blog.author === name ? sum + 1 : sum;
     };
     return blogs.reduce(reducer, 0);
   };
 
-  const bloggerNameArr = blogs.reduce((res, blog) => {
-    return res.includes(blog.author) ? res : res.concat(blog.author);
+  const bloggerNames = blogs.reduce((names, blog) => {
+    return names.includes(blog.author) ? names : names.concat(blog.author);
   }, []);
 
-  const bloggersArr = bloggerNameArr.map((name) => {
-    return { author: name, blogs: totalBlogs(blogs, name) };
+  const bloggersArr = bloggerNames.map((name) => {
+    return { author: name, blogs: totalBlogsByName(blogs, name) };
   });
 
   const highestBlogCount = bloggersArr.reduce((highest, blogger) => {
     return blogger.blogs > highest ? blogger.blogs : highest;
   }, 0);
+
   return bloggersArr.find((blogger) => blogger.blogs === highestBlogCount);
 };
 
@@ -63,7 +64,6 @@ const mostLikes = (blogs) => {
 };
 
 module.exports = {
-  dummy,
   totalLikes,
   favoriteBlog,
   mostBlogs,

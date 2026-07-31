@@ -1,10 +1,41 @@
-const { test, describe } = require("node:test");
+const { test, describe, after, beforeEach } = require("node:test");
 const assert = require("node:assert");
+const supertest = require("supertest");
+const { default: mongoose } = require("mongoose");
+
+const app = require("../app");
 const listHelper = require("../utils/list_helper");
+const Blog = require("../models/blog");
+
+const api = supertest(app);
+
+const initialBlogs = [
+  {
+    title: "Getting Started with Node.js",
+    author: "John Doe",
+    url: "https://example.com/nodejs-guide",
+    likes: 12,
+  },
+  {
+    title: "Understanding Express Middleware",
+    author: "Jane Smith",
+    url: "https://example.com/express-middleware",
+    likes: 25,
+  },
+  {
+    title: "Mastering MongoDB with Mongoose",
+    author: "Alice Johnson",
+    url: "https://example.com/mongoose-tutorial",
+    likes: 18,
+  },
+];
+
+beforeEach(async () => {
+  await Blog.deleteMany({});
+  await Blog.insertMany(initialBlogs);
+});
 
 describe("total likes", () => {
-  const emptyList = [];
-
   const listWithOneBlog = [
     {
       _id: "5a422aa71b54a676234d17f8",
@@ -15,7 +46,6 @@ describe("total likes", () => {
       __v: 0,
     },
   ];
-
   const blogs = [
     {
       _id: "5a422a851b54a676234d17f7",
@@ -44,7 +74,7 @@ describe("total likes", () => {
   ];
 
   test("of empty list is zero", () => {
-    const result = listHelper.totalLikes(emptyList);
+    const result = listHelper.totalLikes([]);
     assert.strictEqual(result, 0);
   });
 
@@ -58,7 +88,6 @@ describe("total likes", () => {
     assert.strictEqual(result, 24);
   });
 });
-
 describe("favorite blog", () => {
   const listWithOneBlog = [
     {
@@ -118,7 +147,6 @@ describe("favorite blog", () => {
     assert.deepStrictEqual(listHelper.favoriteBlog(blogs), expected);
   });
 });
-
 describe("most blogs", () => {
   const listWithOneBlog = [
     {
@@ -175,7 +203,6 @@ describe("most blogs", () => {
     assert.deepStrictEqual(listHelper.mostBlogs(blogs), expected);
   });
 });
-
 describe("most likes", () => {
   const listWithOneBlog = [
     {
@@ -231,4 +258,130 @@ describe("most likes", () => {
     };
     assert.deepStrictEqual(listHelper.mostLikes(blogs), expected);
   });
+});
+
+test("response return in correct amount and json format", async () => {
+  const response = await api
+    .get("/api/blogs")
+    .expect(200)
+    .expect("Content-Type", /application\/json/);
+
+  assert.strictEqual(response.body.length, initialBlogs.length);
+});
+
+test("unique identifier property is named id", async () => {
+  const response = await api
+    .get("/api/blogs")
+    .expect(200)
+    .expect("Content-Type", /application\/json/);
+
+  const randomIndex = Math.floor(Math.random() * response.body.length);
+  const sampleBlog = response.body[randomIndex];
+
+  const sampleBlogKeys = Object.keys(sampleBlog);
+  assert(sampleBlogKeys.includes("id"));
+});
+
+test("valid blog can be added", async () => {
+  const newBlog = {
+    title: "A Deep Dive into JavaScript Closures",
+    author: "Michael Brown",
+    url: "https://example.com/javascript-closures",
+    likes: 42,
+  };
+
+  await api
+    .post("/api/blogs")
+    .send(newBlog)
+    .expect(201)
+    .expect("Content-Type", /application\/json/);
+
+  const response = await api.get("/api/blogs");
+
+  assert.strictEqual(response.body.length, initialBlogs.length + 1);
+
+  const contents = response.body.map((b) => b.title);
+
+  assert(contents.includes(newBlog.title));
+});
+
+test("set likes to zero if likes property is missing", async () => {
+  const newBlog = {
+    title: "A Deep Dive into JavaScript Closures",
+    author: "Michael Brown",
+    url: "https://example.com/javascript-closures",
+  };
+  await api
+    .post("/api/blogs")
+    .send(newBlog)
+    .expect(201)
+    .expect("Content-Type", /application\/json/);
+
+  const response = await api.get("/api/blogs");
+
+  const blogs = response.body;
+
+  const savedBlog = blogs.find((b) => b.title === newBlog.title);
+
+  assert.strictEqual(savedBlog.likes, 0);
+});
+
+test("blog with a missing title or url can not be added", async () => {
+  const blogWithoutTitle = {
+    author: "Michael Brown",
+    url: "https://example.com/javascript-closures",
+    likes: 42,
+  };
+  const blogWithoutUrl = {
+    title: "A Deep Dive into JavaScript Closures",
+    author: "Michael Brown",
+    likes: 42,
+  };
+
+  await api.post("/api/blogs").send(blogWithoutTitle).expect(400);
+  await api.post("/api/blogs").send(blogWithoutUrl).expect(400);
+
+  const response = await api.get("/api/blogs");
+  assert.strictEqual(response.body.length, initialBlogs.length);
+});
+
+test("delete blog by its id", async () => {
+  const resBefore = await api.get("/api/blogs");
+  const blogsBefore = resBefore.body;
+
+  const randomIndex = Math.floor(Math.random() * blogsBefore.length);
+  const blogToDeleteId = blogsBefore[randomIndex].id;
+  const blogToDeleteTitle = blogsBefore[randomIndex].title;
+
+  await api.delete(`/api/blogs/${blogToDeleteId}`).expect(204);
+
+  const resAfter = await api.get("/api/blogs");
+  const blogsAfter = resAfter.body;
+  const titles = blogsAfter.map((b) => b.title);
+
+  assert.strictEqual(blogsAfter.length, blogsBefore.length - 1);
+  assert.strictEqual(titles.includes(blogToDeleteTitle), false);
+});
+
+test("update blog by its id", async () => {
+  const resBefore = await api.get("/api/blogs");
+  const blogsBefore = resBefore.body;
+
+  const randomIndex = Math.floor(Math.random() * blogsBefore.length);
+  const blogToUpdateId = blogsBefore[randomIndex].id;
+  const likesBefore = blogsBefore[randomIndex].likes;
+
+  const updatedBlogResponse = await api
+    .put(`/api/blogs/${blogToUpdateId}`)
+    .send({ likes: likesBefore + 1 })
+    .expect(200)
+    .expect("Content-Type", /application\/json/);
+
+  const likesAfter = updatedBlogResponse.body.likes;
+
+  assert.strictEqual(likesAfter, likesBefore + 1);
+});
+
+after(async () => {
+  await mongoose.connection.close();
 });
