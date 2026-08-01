@@ -30,237 +30,237 @@ const initialBlogs = [
   },
 ];
 
+beforeEach(async () => {
+  await Blog.deleteMany({});
+  await Blog.insertMany(initialBlogs);
+});
+
+describe("total likes", () => {
+  const listWithOneBlog = [
+    {
+      _id: "5a422aa71b54a676234d17f8",
+      title: "Go To Statement Considered Harmful",
+      author: "Edsger W. Dijkstra",
+      url: "https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf",
+      likes: 5,
+      __v: 0,
+    },
+  ];
+  const blogs = [
+    {
+      _id: "5a422a851b54a676234d17f7",
+      title: "React patterns",
+      author: "Michael Chan",
+      url: "https://reactpatterns.com/",
+      likes: 7,
+      __v: 0,
+    },
+    {
+      _id: "5a422aa71b54a676234d17f8",
+      title: "Go To Statement Considered Harmful",
+      author: "Edsger W. Dijkstra",
+      url: "https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf",
+      likes: 5,
+      __v: 0,
+    },
+    {
+      _id: "5a422b3a1b54a676234d17f9",
+      title: "Canonical string reduction",
+      author: "Edsger W. Dijkstra",
+      url: "http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html",
+      likes: 12,
+      __v: 0,
+    },
+  ];
+
+  test("of empty list is zero", () => {
+    const result = listHelper.totalLikes([]);
+    assert.strictEqual(result, 0);
+  });
+
+  test("of list having only one blog, equals the likes of that", () => {
+    const result = listHelper.totalLikes(listWithOneBlog);
+    assert.strictEqual(result, 5);
+  });
+
+  test("of a bigger list is calculated right", () => {
+    const result = listHelper.totalLikes(blogs);
+    assert.strictEqual(result, 24);
+  });
+});
+describe("favorite blog", () => {
+  const listWithOneBlog = [
+    {
+      _id: "5a422aa71b54a676234d17f8",
+      title: "Go To Statement Considered Harmful",
+      author: "Edsger W. Dijkstra",
+      url: "https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf",
+      likes: 5,
+      __v: 0,
+    },
+  ];
+  const blogs = [
+    {
+      _id: "5a422a851b54a676234d17f7",
+      title: "React patterns",
+      author: "Michael Chan",
+      url: "https://reactpatterns.com/",
+      likes: 7,
+      __v: 0,
+    },
+    {
+      _id: "5a422aa71b54a676234d17f8",
+      title: "Go To Statement Considered Harmful",
+      author: "Edsger W. Dijkstra",
+      url: "https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf",
+      likes: 5,
+      __v: 0,
+    },
+    {
+      _id: "5a422b3a1b54a676234d17f9",
+      title: "Canonical string reduction",
+      author: "Edsger W. Dijkstra",
+      url: "http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html",
+      likes: 12,
+      __v: 0,
+    },
+  ];
+
+  test("when there is no blogs", () => {
+    assert.strictEqual(listHelper.favoriteBlog([]), undefined);
+  });
+  test("when there is only one", () => {
+    assert.deepStrictEqual(
+      listHelper.favoriteBlog(listWithOneBlog),
+      listWithOneBlog[0],
+    );
+  });
+  test("when there is multiple blogs", () => {
+    const expected = {
+      _id: "5a422b3a1b54a676234d17f9",
+      title: "Canonical string reduction",
+      author: "Edsger W. Dijkstra",
+      url: "http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html",
+      likes: 12,
+      __v: 0,
+    };
+    assert.deepStrictEqual(listHelper.favoriteBlog(blogs), expected);
+  });
+});
+describe("most blogs", () => {
+  const listWithOneBlog = [
+    {
+      _id: "5a422aa71b54a676234d17f8",
+      title: "Go To Statement Considered Harmful",
+      author: "Edsger W. Dijkstra",
+      url: "https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf",
+      likes: 5,
+      __v: 0,
+    },
+  ];
+  const blogs = [
+    {
+      _id: "5a422a851b54a676234d17f7",
+      title: "React patterns",
+      author: "Michael Chan",
+      url: "https://reactpatterns.com/",
+      likes: 7,
+      __v: 0,
+    },
+    {
+      _id: "5a422aa71b54a676234d17f8",
+      title: "Go To Statement Considered Harmful",
+      author: "Edsger W. Dijkstra",
+      url: "https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf",
+      likes: 5,
+      __v: 0,
+    },
+    {
+      _id: "5a422b3a1b54a676234d17f9",
+      title: "Canonical string reduction",
+      author: "Edsger W. Dijkstra",
+      url: "http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html",
+      likes: 12,
+      __v: 0,
+    },
+  ];
+
+  test("when there is no blogs", () => {
+    assert.strictEqual(listHelper.mostBlogs([]), 0);
+  });
+  test("when there is only one", () => {
+    const expected = {
+      author: listWithOneBlog[0].author,
+      blogs: 1,
+    };
+    assert.deepStrictEqual(listHelper.mostBlogs(listWithOneBlog), expected);
+  });
+  test("when there is multiple blogs", () => {
+    const expected = {
+      author: "Edsger W. Dijkstra",
+      blogs: 2,
+    };
+    assert.deepStrictEqual(listHelper.mostBlogs(blogs), expected);
+  });
+});
+describe("most likes", () => {
+  const listWithOneBlog = [
+    {
+      _id: "5a422aa71b54a676234d17f8",
+      title: "Go To Statement Considered Harmful",
+      author: "Edsger W. Dijkstra",
+      url: "https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf",
+      likes: 5,
+      __v: 0,
+    },
+  ];
+  const blogs = [
+    {
+      _id: "5a422a851b54a676234d17f7",
+      title: "React patterns",
+      author: "Michael Chan",
+      url: "https://reactpatterns.com/",
+      likes: 7,
+      __v: 0,
+    },
+    {
+      _id: "5a422aa71b54a676234d17f8",
+      title: "Go To Statement Considered Harmful",
+      author: "Edsger W. Dijkstra",
+      url: "https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf",
+      likes: 5,
+      __v: 0,
+    },
+    {
+      _id: "5a422b3a1b54a676234d17f9",
+      title: "Canonical string reduction",
+      author: "Edsger W. Dijkstra",
+      url: "http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html",
+      likes: 12,
+      __v: 0,
+    },
+  ];
+
+  test("when there is no blogs", () => {
+    assert.strictEqual(listHelper.mostLikes([]), 0);
+  });
+  test("when there is only one", () => {
+    const expected = {
+      author: listWithOneBlog[0].author,
+      likes: 5,
+    };
+    assert.deepStrictEqual(listHelper.mostLikes(listWithOneBlog), expected);
+  });
+  test("when there is multiple blogs", () => {
+    const expected = {
+      author: "Edsger W. Dijkstra",
+      likes: 17,
+    };
+    assert.deepStrictEqual(listHelper.mostLikes(blogs), expected);
+  });
+});
+
 describe("when there is initially some blogs saved to DB", () => {
-  beforeEach(async () => {
-    await Blog.deleteMany({});
-    await Blog.insertMany(initialBlogs);
-  });
-
-  describe("total likes", () => {
-    const listWithOneBlog = [
-      {
-        _id: "5a422aa71b54a676234d17f8",
-        title: "Go To Statement Considered Harmful",
-        author: "Edsger W. Dijkstra",
-        url: "https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf",
-        likes: 5,
-        __v: 0,
-      },
-    ];
-    const blogs = [
-      {
-        _id: "5a422a851b54a676234d17f7",
-        title: "React patterns",
-        author: "Michael Chan",
-        url: "https://reactpatterns.com/",
-        likes: 7,
-        __v: 0,
-      },
-      {
-        _id: "5a422aa71b54a676234d17f8",
-        title: "Go To Statement Considered Harmful",
-        author: "Edsger W. Dijkstra",
-        url: "https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf",
-        likes: 5,
-        __v: 0,
-      },
-      {
-        _id: "5a422b3a1b54a676234d17f9",
-        title: "Canonical string reduction",
-        author: "Edsger W. Dijkstra",
-        url: "http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html",
-        likes: 12,
-        __v: 0,
-      },
-    ];
-
-    test("of empty list is zero", () => {
-      const result = listHelper.totalLikes([]);
-      assert.strictEqual(result, 0);
-    });
-
-    test("of list having only one blog, equals the likes of that", () => {
-      const result = listHelper.totalLikes(listWithOneBlog);
-      assert.strictEqual(result, 5);
-    });
-
-    test("of a bigger list is calculated right", () => {
-      const result = listHelper.totalLikes(blogs);
-      assert.strictEqual(result, 24);
-    });
-  });
-  describe("favorite blog", () => {
-    const listWithOneBlog = [
-      {
-        _id: "5a422aa71b54a676234d17f8",
-        title: "Go To Statement Considered Harmful",
-        author: "Edsger W. Dijkstra",
-        url: "https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf",
-        likes: 5,
-        __v: 0,
-      },
-    ];
-    const blogs = [
-      {
-        _id: "5a422a851b54a676234d17f7",
-        title: "React patterns",
-        author: "Michael Chan",
-        url: "https://reactpatterns.com/",
-        likes: 7,
-        __v: 0,
-      },
-      {
-        _id: "5a422aa71b54a676234d17f8",
-        title: "Go To Statement Considered Harmful",
-        author: "Edsger W. Dijkstra",
-        url: "https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf",
-        likes: 5,
-        __v: 0,
-      },
-      {
-        _id: "5a422b3a1b54a676234d17f9",
-        title: "Canonical string reduction",
-        author: "Edsger W. Dijkstra",
-        url: "http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html",
-        likes: 12,
-        __v: 0,
-      },
-    ];
-
-    test("when there is no blogs", () => {
-      assert.strictEqual(listHelper.favoriteBlog([]), undefined);
-    });
-    test("when there is only one", () => {
-      assert.deepStrictEqual(
-        listHelper.favoriteBlog(listWithOneBlog),
-        listWithOneBlog[0],
-      );
-    });
-    test("when there is multiple blogs", () => {
-      const expected = {
-        _id: "5a422b3a1b54a676234d17f9",
-        title: "Canonical string reduction",
-        author: "Edsger W. Dijkstra",
-        url: "http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html",
-        likes: 12,
-        __v: 0,
-      };
-      assert.deepStrictEqual(listHelper.favoriteBlog(blogs), expected);
-    });
-  });
-  describe("most blogs", () => {
-    const listWithOneBlog = [
-      {
-        _id: "5a422aa71b54a676234d17f8",
-        title: "Go To Statement Considered Harmful",
-        author: "Edsger W. Dijkstra",
-        url: "https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf",
-        likes: 5,
-        __v: 0,
-      },
-    ];
-    const blogs = [
-      {
-        _id: "5a422a851b54a676234d17f7",
-        title: "React patterns",
-        author: "Michael Chan",
-        url: "https://reactpatterns.com/",
-        likes: 7,
-        __v: 0,
-      },
-      {
-        _id: "5a422aa71b54a676234d17f8",
-        title: "Go To Statement Considered Harmful",
-        author: "Edsger W. Dijkstra",
-        url: "https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf",
-        likes: 5,
-        __v: 0,
-      },
-      {
-        _id: "5a422b3a1b54a676234d17f9",
-        title: "Canonical string reduction",
-        author: "Edsger W. Dijkstra",
-        url: "http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html",
-        likes: 12,
-        __v: 0,
-      },
-    ];
-
-    test("when there is no blogs", () => {
-      assert.strictEqual(listHelper.mostBlogs([]), 0);
-    });
-    test("when there is only one", () => {
-      const expected = {
-        author: listWithOneBlog[0].author,
-        blogs: 1,
-      };
-      assert.deepStrictEqual(listHelper.mostBlogs(listWithOneBlog), expected);
-    });
-    test("when there is multiple blogs", () => {
-      const expected = {
-        author: "Edsger W. Dijkstra",
-        blogs: 2,
-      };
-      assert.deepStrictEqual(listHelper.mostBlogs(blogs), expected);
-    });
-  });
-  describe("most likes", () => {
-    const listWithOneBlog = [
-      {
-        _id: "5a422aa71b54a676234d17f8",
-        title: "Go To Statement Considered Harmful",
-        author: "Edsger W. Dijkstra",
-        url: "https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf",
-        likes: 5,
-        __v: 0,
-      },
-    ];
-    const blogs = [
-      {
-        _id: "5a422a851b54a676234d17f7",
-        title: "React patterns",
-        author: "Michael Chan",
-        url: "https://reactpatterns.com/",
-        likes: 7,
-        __v: 0,
-      },
-      {
-        _id: "5a422aa71b54a676234d17f8",
-        title: "Go To Statement Considered Harmful",
-        author: "Edsger W. Dijkstra",
-        url: "https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf",
-        likes: 5,
-        __v: 0,
-      },
-      {
-        _id: "5a422b3a1b54a676234d17f9",
-        title: "Canonical string reduction",
-        author: "Edsger W. Dijkstra",
-        url: "http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html",
-        likes: 12,
-        __v: 0,
-      },
-    ];
-
-    test("when there is no blogs", () => {
-      assert.strictEqual(listHelper.mostLikes([]), 0);
-    });
-    test("when there is only one", () => {
-      const expected = {
-        author: listWithOneBlog[0].author,
-        likes: 5,
-      };
-      assert.deepStrictEqual(listHelper.mostLikes(listWithOneBlog), expected);
-    });
-    test("when there is multiple blogs", () => {
-      const expected = {
-        author: "Edsger W. Dijkstra",
-        likes: 17,
-      };
-      assert.deepStrictEqual(listHelper.mostLikes(blogs), expected);
-    });
-  });
-
   test("blogs are returned as json", async () => {
     await api
       .get("/api/blogs")
@@ -296,8 +296,14 @@ describe("when there is initially some blogs saved to DB", () => {
         likes: 42,
       };
 
+      const loginResponse = await api
+        .post("/api/login")
+        .send({ username: "root", password: "password" });
+      const token = loginResponse.body.token;
+
       await api
         .post("/api/blogs")
+        .set("Authorization", `Bearer ${token}`)
         .send(newBlog)
         .expect(201)
         .expect("Content-Type", /application\/json/);
@@ -330,14 +336,33 @@ describe("when there is initially some blogs saved to DB", () => {
       assert.strictEqual(response.body.length, initialBlogs.length);
     });
 
+    test("fails with status code 401 if token is not provided", async () => {
+      const newBlog = {
+        title: "A Deep Dive into JavaScript Closures",
+        author: "Michael Brown",
+        url: "https://example.com/javascript-closures",
+        likes: 42,
+      };
+
+      await api.post("/api/blogs").send(newBlog).expect(401);
+    });
+
     test("set likes to zero if likes property is missing", async () => {
       const newBlog = {
         title: "A Deep Dive into JavaScript Closures",
         author: "Michael Brown",
         url: "https://example.com/javascript-closures",
       };
+
+      const loginResponse = await api
+        .post("/api/login")
+        .send({ username: "root", password: "password" });
+
+      const token = loginResponse.body.token;
+
       await api
         .post("/api/blogs")
+        .set("Authorization", `Bearer ${token}`)
         .send(newBlog)
         .expect(201)
         .expect("Content-Type", /application\/json/);
@@ -353,15 +378,35 @@ describe("when there is initially some blogs saved to DB", () => {
   });
 
   describe("deleting a blog", () => {
-    test("by its id", async () => {
+    test("succeeds with valid token", async () => {
+      const loginResponse = await api
+        .post("/api/login")
+        .send({ username: "root", password: "password" });
+
+      const token = loginResponse.body.token;
+
+      const newBlogResponse = await api
+        .post("/api/blogs")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          title: "A Deep Dive into JavaScript Closures",
+          author: "Michael Brown",
+          url: "https://example.com/javascript-closures",
+          likes: 42,
+        })
+        .expect(201)
+        .expect("Content-Type", /application\/json/);
+
+      const blogToDeleteId = newBlogResponse.body.id;
+      const blogToDeleteTitle = newBlogResponse.body.title;
+
       const resBefore = await api.get("/api/blogs");
       const blogsBefore = resBefore.body;
 
-      const randomIndex = Math.floor(Math.random() * blogsBefore.length);
-      const blogToDeleteId = blogsBefore[randomIndex].id;
-      const blogToDeleteTitle = blogsBefore[randomIndex].title;
-
-      await api.delete(`/api/blogs/${blogToDeleteId}`).expect(204);
+      await api
+        .delete(`/api/blogs/${blogToDeleteId}`)
+        .set("Authorization", `Bearer ${token}`)
+        .expect(204);
 
       const resAfter = await api.get("/api/blogs");
       const blogsAfter = resAfter.body;
@@ -373,16 +418,31 @@ describe("when there is initially some blogs saved to DB", () => {
   });
 
   describe("updating a blog", () => {
-    test("by its id", async () => {
-      const resBefore = await api.get("/api/blogs");
-      const blogsBefore = resBefore.body;
+    test("succeeds with valid token", async () => {
+      const loginResponse = await api
+        .post("/api/login")
+        .send({ username: "root", password: "password" });
 
-      const randomIndex = Math.floor(Math.random() * blogsBefore.length);
-      const blogToUpdateId = blogsBefore[randomIndex].id;
-      const likesBefore = blogsBefore[randomIndex].likes;
+      const token = loginResponse.body.token;
+
+      const newBlogResponse = await api
+        .post("/api/blogs")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          title: "Refactoring Patterns",
+          author: "John Smith",
+          url: "https://example.com/refactoring-patterns",
+          likes: 10,
+        })
+        .expect(201)
+        .expect("Content-Type", /application\/json/);
+
+      const blogToUpdateId = newBlogResponse.body.id;
+      const likesBefore = newBlogResponse.body.likes;
 
       const updatedBlogResponse = await api
         .put(`/api/blogs/${blogToUpdateId}`)
+        .set("Authorization", `Bearer ${token}`)
         .send({ likes: likesBefore + 1 })
         .expect(200)
         .expect("Content-Type", /application\/json/);

@@ -20,7 +20,7 @@ describe("when there is only one user in db", () => {
   });
 
   describe("adding a user", () => {
-    test.only("fails with invalid user with 400 status code and error message", async () => {
+    test("fails with invalid user with 400 status code and error message", async () => {
       const usersAtStart = await api.get("/api/users");
 
       const invalidUser = { username: "mahmoud", password: "" };
