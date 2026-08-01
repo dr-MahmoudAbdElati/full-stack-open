@@ -11,6 +11,9 @@ userRouter.get("/", async (request, response) => {
 userRouter.post("/", async (request, response) => {
   const { username, name, password } = request.body;
 
+  if (!(password && password.length >= 3))
+    return response.status(400).json({ error: "invalid or missing password" });
+
   const passwordHash = await bcrypt.hash(password, 10);
 
   const newUser = new User({
