@@ -44,7 +44,7 @@ blogsRouter.post("/", async (request, response) => {
     return response.status(400).json({ error: "UserId missing or not valid" });
   }
 
-  const newBlog = new Blog({ title, url, author, likes });
+  const newBlog = new Blog({ title, url, author, likes, user: user._id });
   const savedBlog = await newBlog.save();
 
   user.blogs = user.blogs.concat(savedBlog);
