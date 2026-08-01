@@ -19,6 +19,7 @@ mongoose
   });
 
 app.use(express.json());
+app.use(middleware.tokenExtractor);
 app.use(middleware.requestLogger);
 
 app.use("/api/login", loginRouter);
