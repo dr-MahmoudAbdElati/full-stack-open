@@ -1,7 +1,18 @@
 import { useState } from "react";
 
-const Blog = ({ blog }) => {
+const Blog = ({ blog, updateBlog }) => {
   const [visible, setVisible] = useState(false);
+
+  const handleUpdateLikes = (blog) => {
+    const blogId = blog.id ?? blog._id;
+
+    if (!blogId) {
+      console.error("Missing blog id:", blog);
+      return;
+    }
+
+    updateBlog(blogId, { likes: blog.likes + 1 });
+  };
 
   const blogStyle = {
     padding: 5,
@@ -19,7 +30,8 @@ const Blog = ({ blog }) => {
       </p>
       <p>{blog.url}</p>
       <p>
-        likes: {blog.likes} <button>like</button>
+        likes: {blog.likes}{" "}
+        <button onClick={() => handleUpdateLikes(blog)}>like</button>
       </p>
       <p>{blog.author}</p>
     </div>

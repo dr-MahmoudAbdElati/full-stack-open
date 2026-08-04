@@ -63,6 +63,10 @@ const App = () => {
       console.log(err);
     }
   };
+  const updateBlog = async (id, updatedObject) => {
+    const updatedBlog = await blogService.update(id, updatedObject);
+    setBlogs(blogs.map((blog) => (blog.id === id ? updatedBlog : blog)));
+  };
 
   const loginForm = () => (
     <>
@@ -97,7 +101,7 @@ const App = () => {
     </>
   );
 
-  const blogFormRef = useRef()
+  const blogFormRef = useRef();
   const blogSection = () => {
     return (
       <>
@@ -119,7 +123,7 @@ const App = () => {
 
           <div>
             {blogs.map((blog) => (
-              <Blog key={blog.id} blog={blog} />
+              <Blog blog={blog} updateBlog={updateBlog} key={blog.id} />
             ))}
           </div>
         </div>

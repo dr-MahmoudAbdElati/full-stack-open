@@ -1,5 +1,6 @@
 const blogsRouter = require("express").Router();
 const jwt = require("jsonwebtoken");
+const mongoose = require("mongoose");
 
 const Blog = require("../models/blog");
 const User = require("../models/user");
@@ -72,25 +73,37 @@ blogsRouter.delete("/:id", async (request, response) => {
 });
 
 blogsRouter.put("/:id", async (request, response) => {
-  const updatedBlog = request.body;
-  if (!updatedBlog.likes)
-    return response.status(400).json({ error: "missing content" });
+  const blogId = request.params.id;
 
-  if (!request.params.id) {
+  if (!blogId) {
     return response.status(400).json({ error: "BlogId missing or not valid" });
   }
 
-  const result = await Blog.findByIdAndUpdate(request.params.id, updatedBlog, {
-    returnDocument: "after",
-    runValidators: true,
-    context: "query",
-  });
-
-  if (result) {
-    response.status(200).json(result);
-  } else {
-    response.status(404).end();
+  if (!mongoose.Types.ObjectId.isValid(blogId)) {
+    return response.status(400).json({ error: "malformatted id" });
   }
+
+  const { likes } = request.body;
+
+  if (likes === undefined) {
+    return response.status(400).json({ error: "missing content" });
+  }
+
+  const updatedBlog = await Blog.findByIdAndUpdate(
+    blogId,
+    { likes },
+    {
+      returnDocument: "after",
+      runValidators: true,
+      context: "query",
+    },
+  );
+
+  if (!updatedBlog) {
+    return response.status(404).json({ error: "Blog not found" });
+  }
+
+  return response.status(200).json(updatedBlog);
 });
 
 module.exports = blogsRouter;
