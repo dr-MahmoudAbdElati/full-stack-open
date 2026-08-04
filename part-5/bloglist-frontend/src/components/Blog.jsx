@@ -22,6 +22,8 @@ const Blog = ({ blog, updateBlog }) => {
     marginBottom: 5,
   };
 
+  const userName = blog.user?.name ?? "unknown user";
+
   return visible ? (
     <div style={blogStyle}>
       <p>
@@ -33,11 +35,11 @@ const Blog = ({ blog, updateBlog }) => {
         likes: {blog.likes}{" "}
         <button onClick={() => handleUpdateLikes(blog)}>like</button>
       </p>
-      <p>{blog.author}</p>
+      <p>{userName}</p>
     </div>
   ) : (
     <div style={blogStyle}>
-      {blog.title} {blog.author} {"  "}
+      {blog.title} {userName} {"  "}
       <button onClick={() => setVisible(true)}>view</button>
     </div>
   );
