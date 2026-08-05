@@ -6,6 +6,13 @@ import Notification from "./components/Notification";
 import BlogForm from "./components/BlogFrom";
 import Togglable from "./components/Togglable";
 
+const normalizeUser = (userData) => ({
+  token: userData.token,
+  username: userData.username ?? userData.user?.username,
+  name: userData.name ?? userData.user?.name,
+  blogs: userData.blogs ?? userData.user?.blogs ?? [],
+});
+
 const App = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -25,18 +32,23 @@ const App = () => {
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem("loggedBlogappUser");
     if (loggedUserJSON) {
-      const user = JSON.parse(loggedUserJSON);
-      setUser(user);
+      const storedUser = JSON.parse(loggedUserJSON);
+      setUser(normalizeUser(storedUser));
     }
   }, []);
 
   const handleLogin = async (event) => {
     try {
       event.preventDefault();
-      const user = await loginService.login({ username, password });
-      setUser(user);
-      blogService.setToken(user.token);
-      window.localStorage.setItem("loggedBlogappUser", JSON.stringify(user));
+      const loggedInUser = await loginService.login({ username, password });
+      const normalizedUser = normalizeUser(loggedInUser);
+
+      setUser(normalizedUser);
+      blogService.setToken(normalizedUser.token);
+      window.localStorage.setItem(
+        "loggedBlogappUser",
+        JSON.stringify(normalizedUser),
+      );
       setUsername("");
       setPassword("");
     } catch (err) {
@@ -66,6 +78,36 @@ const App = () => {
   const updateBlog = async (id, updatedObject) => {
     const updatedBlog = await blogService.update(id, updatedObject);
     setBlogs(blogs.map((blog) => (blog.id === id ? updatedBlog : blog)));
+  };
+  const deleteBlog = async (blogId) => {
+    try {
+      const response = await blogService.deleteBlog(blogId);
+
+      if (response.status === 204) {
+        setBlogs((currentBlogs) =>
+          currentBlogs.filter((blog) => blog.id !== blogId),
+        );
+
+        setUser((currentUser) => {
+          if (!currentUser) return currentUser;
+
+          const updatedUser = {
+            ...currentUser,
+            blogs: (currentUser.blogs ?? []).filter((blog) => blog !== blogId),
+          };
+
+          window.localStorage.setItem(
+            "loggedBlogappUser",
+            JSON.stringify(updatedUser),
+          );
+
+          return updatedUser;
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      setNotification({ message: error.response.data.error });
+    }
   };
 
   const loginForm = () => (
@@ -114,7 +156,7 @@ const App = () => {
             />
           )}
           <p>
-            {user.user.name} logged in{" "}
+            {user.name} logged in{" "}
             <button onClick={handleLogout}>logout</button>{" "}
           </p>
           <Togglable buttonLabel="create new blog" ref={blogFormRef}>
@@ -123,7 +165,13 @@ const App = () => {
 
           <div>
             {blogs.map((blog) => (
-              <Blog blog={blog} updateBlog={updateBlog} key={blog.id} />
+              <Blog
+                blog={blog}
+                updateBlog={updateBlog}
+                deleteBlog={deleteBlog}
+                user={user}
+                key={blog.id}
+              />
             ))}
           </div>
         </div>
