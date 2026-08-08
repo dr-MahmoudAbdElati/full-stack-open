@@ -46,4 +46,24 @@ describe("<Blog /> component", () => {
     expect(likes).toBeInTheDocument();
     expect(username).toBeInTheDocument();
   });
+
+  test("pressing like button twice calls updateBlog twice", async () => {
+    const newBlog = {
+      id: "blog-1",
+      title: "good title",
+      url: "example url",
+      user: { name: "mahmoud" },
+      likes: 0,
+    };
+
+    const mockHandler = vi.fn();
+    render(<Blog blog={newBlog} updateBlog={mockHandler} />);
+
+    const user = userEvent.setup();
+    await user.click(screen.getByText("view"));
+    await user.click(screen.getByText("like"));
+    await user.click(screen.getByText("like"));
+
+    expect(mockHandler).toHaveBeenCalledTimes(2);
+  });
 });
