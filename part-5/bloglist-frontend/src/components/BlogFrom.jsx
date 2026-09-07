@@ -1,6 +1,7 @@
 import { useState } from 'react'
+import Notification from './Notification'
 
-const BlogForm = (props) => {
+const BlogForm = ({ addBlog, notification, setNotification }) => {
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [url, setUrl] = useState('')
@@ -13,7 +14,7 @@ const BlogForm = (props) => {
       url,
     }
 
-    props.addBlog(newBlog)
+    addBlog(newBlog)
 
     setTitle('')
     setAuthor('')
@@ -23,6 +24,10 @@ const BlogForm = (props) => {
   return (
     <div>
       <h2>create new</h2>
+      <Notification
+        notification={notification}
+        setNotification={setNotification}
+      />
       <form onSubmit={createBlog}>
         <div>
           <label>

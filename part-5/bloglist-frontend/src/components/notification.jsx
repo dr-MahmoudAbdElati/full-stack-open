@@ -3,7 +3,7 @@ export default function Notification({ notification, setNotification }) {
 
   setTimeout(() => {
     setNotification(null)
-  }, 5000)
+  }, 4000)
 
   const notificationStyle = {
     color: notification.type === 'success' ? 'green' : 'red',

@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link, Route, Routes, useMatch } from 'react-router-dom'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
-import Notification from './components/Notification'
 import BlogForm from './components/BlogFrom'
 import BlogList from './components/BlogList'
+import LoginForm from './components/LoginForm'
 
 const normalizeUser = (userData) => ({
   token: userData.token,
@@ -72,13 +72,13 @@ const App = () => {
   }
   const addBlog = async (blogObject) => {
     try {
-      blogFormRef.current.toggleVisibility()
       const createdBlog = await blogService.create(blogObject)
       setBlogs(blogs.concat(createdBlog))
       setNotification({
         message: `A new blog ${createdBlog.title} by ${createdBlog.author} added`,
         type: 'success',
       })
+      navigate('/')
     } catch (err) {
       setNotification({ message: 'Error creating blog', type: 'error' })
       console.log(err)
@@ -113,44 +113,12 @@ const App = () => {
           return updatedUser
         })
       }
+      navigate('/')
     } catch (error) {
       console.log(error)
       setNotification({ message: error.response.data.error })
     }
   }
-
-  const loginForm = () => (
-    <>
-      <h2>log in to application</h2>
-      <Notification
-        notification={notification}
-        setNotification={setNotification}
-      />
-      <form onSubmit={handleLogin}>
-        <div>
-          <label>
-            username
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-          </label>
-        </div>
-        <div>
-          <label>
-            password
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </label>
-        </div>
-        <button type="submit">login</button>
-      </form>
-    </>
-  )
 
   return (
     <>
@@ -163,13 +131,31 @@ const App = () => {
             login
           </Link>
         ) : (
-          <button onClick={handleLogout}>logout</button>
+          <>
+            <Link to="/create" style={{ padding: 5 }}>
+              new blog
+            </Link>
+            <button onClick={handleLogout}>logout</button>
+          </>
         )}
       </div>
 
       <Routes>
         <Route path="/" element={<BlogList blogs={blogs} />} />
-        <Route path="/login" element={loginForm()} />
+        <Route
+          path="/login"
+          element={
+            <LoginForm
+              handleLogin={handleLogin}
+              notification={notification}
+              setNotification={setNotification}
+              username={username}
+              setUsername={setUsername}
+              password={password}
+              setPassword={setPassword}
+            />
+          }
+        />
         <Route
           path="/blogs/:id"
           element={
@@ -178,6 +164,18 @@ const App = () => {
               user={user}
               updateBlog={updateBlog}
               deleteBlog={deleteBlog}
+              notification={notification}
+              setNotification={setNotification}
+            />
+          }
+        />
+        <Route
+          path="/create"
+          element={
+            <BlogForm
+              addBlog={addBlog}
+              notification={notification}
+              setNotification={setNotification}
             />
           }
         />

@@ -1,4 +1,13 @@
-const Blog = ({ blog, updateBlog, deleteBlog, user }) => {
+import Notification from './Notification'
+
+const Blog = ({
+  blog,
+  updateBlog,
+  deleteBlog,
+  user,
+  notification,
+  setNotification,
+}) => {
   const handleUpdateLikes = (blog) => {
     const blogId = blog.id ?? blog._id
     if (!blogId) {
@@ -31,6 +40,10 @@ const Blog = ({ blog, updateBlog, deleteBlog, user }) => {
 
   return (
     <div>
+      <Notification
+        notification={notification}
+        setNotification={setNotification}
+      />
       <h2>{blog.title}</h2>
 
       <a href="">{blog.url}</a>
