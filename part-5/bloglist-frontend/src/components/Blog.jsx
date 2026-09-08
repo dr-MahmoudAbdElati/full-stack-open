@@ -50,15 +50,16 @@ const Blog = ({
 
       <p>
         likes: {blog.likes}
-        {'  '}
-        <button onClick={() => handleUpdateLikes(blog)}>like</button>
+        {user && !isOwner && (
+          <button onClick={() => handleUpdateLikes(blog)}>like</button>
+        )}
       </p>
 
       <p>Added by {blog.user?.name ?? 'unknown user'}</p>
 
-      {isOwner ? (
+      {user && isOwner && (
         <button onClick={() => handleDeleteBlog(blog)}>remove</button>
-      ) : null}
+      )}
     </div>
   )
 }

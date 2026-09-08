@@ -4,7 +4,7 @@ import Blog from './Blog'
 import userEvent from '@testing-library/user-event'
 
 describe('<Blog /> component', () => {
-  test('renders the title', async () => {
+  test('information and the number of likes are shown to non-logged-in users, buttons are not shown', async () => {
     const newBlog = {
       title: 'good title',
       url: 'example url',
@@ -15,55 +15,85 @@ describe('<Blog /> component', () => {
     render(<Blog blog={newBlog} />)
 
     const titleElement = await screen.findByText(/good title/)
-    const urlElement = await screen.queryByText(/example url/)
-    const likesElement = await screen.queryByText(/likes:/)
+    const urlElement = screen.queryByText(/example url/)
+    const likesElement = screen.queryByText(/likes:/)
+    const likesNumberElement = screen.queryByText(/0/)
+    const likeButton = screen.queryByRole('button', { name: 'like' })
+    const removeButton = screen.queryByRole('button', { name: 'remove' })
 
     expect(titleElement).toBeInTheDocument()
-    expect(urlElement).toBeNull()
-    expect(likesElement).toBeNull()
-  })
-
-  test('displays URL, likes and user when pressing the view button', async () => {
-    const newBlog = {
-      title: 'good title',
-      url: 'example url',
-      likes: 0,
-      user: { name: 'mahmoud' },
-    }
-
-    render(<Blog blog={newBlog} />)
-
-    const user = userEvent.setup()
-    const viewButton = screen.getByText('view')
-
-    await user.click(viewButton)
-
-    const urlElement = await screen.findByText(/example url/)
-    const likes = await screen.findByText(/likes:\s*0/)
-    const username = await screen.findByText(/mahmoud/)
-
     expect(urlElement).toBeInTheDocument()
-    expect(likes).toBeInTheDocument()
-    expect(username).toBeInTheDocument()
+    expect(likesElement).toBeInTheDocument()
+    expect(likesNumberElement).toBeInTheDocument()
+    expect(likeButton).toBeNull()
+    expect(removeButton).toBeNull()
   })
 
-  test('pressing like button twice calls updateBlog twice', async () => {
+  test('like button is shown only to logged-in users who are not the owner, remove button is shown only to the owner', async () => {
     const newBlog = {
-      id: 'blog-1',
       title: 'good title',
       url: 'example url',
-      user: { name: 'mahmoud' },
+      user: { name: 'mahmoud', username: 'mahmoud' },
       likes: 0,
     }
 
-    const mockHandler = vi.fn()
-    render(<Blog blog={newBlog} updateBlog={mockHandler} />)
+    const loggedInUser = {
+      name: 'mahmoud',
+      username: 'mahmoud',
+    }
 
-    const user = userEvent.setup()
-    await user.click(screen.getByText('view'))
-    await user.click(screen.getByText('like'))
-    await user.click(screen.getByText('like'))
+    const { rerender } = render(<Blog blog={newBlog} user={loggedInUser} />)
 
-    expect(mockHandler).toHaveBeenCalledTimes(2)
+    const likeButton = screen.queryByRole('button', { name: 'like' })
+    const removeButton = screen.queryByRole('button', { name: 'remove' })
+
+    expect(likeButton).toBeNull()
+    expect(removeButton).toBeInTheDocument()
+
+    rerender(
+      <Blog
+        blog={newBlog}
+        user={{ name: 'someone else', username: 'someone' }}
+      />,
+    )
+
+    const likeButtonForOtherUser = screen.queryByRole('button', {
+      name: 'like',
+    })
+    const removeButtonForOtherUser = screen.queryByRole('button', {
+      name: 'remove',
+    })
+
+    expect(likeButtonForOtherUser).toBeInTheDocument()
+    expect(removeButtonForOtherUser).toBeNull()
   })
+
+  test("pressing like button twice calls updateBlog twice", async () => {
+    const newBlog = {
+      id: "1",
+      title: "good title",
+      url: "example url",
+      user: { name: "mahmoud", username: "mahmoud" },
+      likes: 0,
+    };
+
+    const mockHandler = vi.fn();
+    render(
+      <Blog
+        blog={newBlog}
+        user={{ name: "alice", username: "alice" }}
+        updateBlog={mockHandler}
+      />,
+    );
+
+    const user = userEvent.setup();
+    const likeButton = screen.getByRole("button", { name: "like" });
+
+    expect(likeButton).toBeInTheDocument();
+
+    await user.click(likeButton);
+    await user.click(likeButton);
+
+    expect(mockHandler).toHaveBeenCalledTimes(2);
+  });
 })
