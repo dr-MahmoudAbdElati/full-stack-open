@@ -49,7 +49,7 @@ const Blog = ({
       <a href="">{blog.url}</a>
 
       <p>
-        likes: {blog.likes}
+        <span>likes: {blog.likes}</span>
         {user && !isOwner && (
           <button onClick={() => handleUpdateLikes(blog)}>like</button>
         )}

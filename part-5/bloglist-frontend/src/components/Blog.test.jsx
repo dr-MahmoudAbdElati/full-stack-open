@@ -68,32 +68,32 @@ describe('<Blog /> component', () => {
     expect(removeButtonForOtherUser).toBeNull()
   })
 
-  test("pressing like button twice calls updateBlog twice", async () => {
+  test('pressing like button twice calls updateBlog twice', async () => {
     const newBlog = {
-      id: "1",
-      title: "good title",
-      url: "example url",
-      user: { name: "mahmoud", username: "mahmoud" },
+      id: '1',
+      title: 'good title',
+      url: 'example url',
+      user: { name: 'mahmoud', username: 'mahmoud' },
       likes: 0,
-    };
+    }
 
-    const mockHandler = vi.fn();
+    const mockHandler = vi.fn()
     render(
       <Blog
         blog={newBlog}
-        user={{ name: "alice", username: "alice" }}
+        user={{ name: 'alice', username: 'alice' }}
         updateBlog={mockHandler}
       />,
-    );
+    )
 
-    const user = userEvent.setup();
-    const likeButton = screen.getByRole("button", { name: "like" });
+    const user = userEvent.setup()
+    const likeButton = screen.getByRole('button', { name: 'like' })
 
-    expect(likeButton).toBeInTheDocument();
+    expect(likeButton).toBeInTheDocument()
 
-    await user.click(likeButton);
-    await user.click(likeButton);
+    await user.click(likeButton)
+    await user.click(likeButton)
 
-    expect(mockHandler).toHaveBeenCalledTimes(2);
-  });
+    expect(mockHandler).toHaveBeenCalledTimes(2)
+  })
 })
