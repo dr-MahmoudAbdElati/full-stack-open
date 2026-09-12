@@ -1,3 +1,5 @@
+import { Alert } from '@mui/material'
+
 export default function Notification({ notification, setNotification }) {
   if (!notification) return null
 
@@ -5,14 +7,12 @@ export default function Notification({ notification, setNotification }) {
     setNotification(null)
   }, 4000)
 
-  const notificationStyle = {
-    color: notification.type === 'success' ? 'green' : 'red',
-    background: 'lightgrey',
-    fontSize: 20,
-    borderStyle: 'solid',
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10,
-  }
-  return <div style={notificationStyle}>{notification.message}</div>
+  return (
+    <Alert
+      style={{ marginTop: 10, marginBottom: 10 }}
+      severity={notification.type}
+    >
+      {notification.message}
+    </Alert>
+  )
 }

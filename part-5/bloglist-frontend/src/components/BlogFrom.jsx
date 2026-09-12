@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Notification from './Notification'
+import { Button, TextField } from '@mui/material'
 
 const BlogForm = ({ addBlog, notification, setNotification }) => {
   const [title, setTitle] = useState('')
@@ -24,42 +25,40 @@ const BlogForm = ({ addBlog, notification, setNotification }) => {
   return (
     <div>
       <h2>create new</h2>
+
       <Notification
         notification={notification}
         setNotification={setNotification}
       />
+
       <form onSubmit={createBlog}>
-        <div>
-          <label>
-            title:
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-          </label>
+        <div style={{ marginTop: 10 }}>
+          <TextField
+            label="title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
         </div>
-        <div>
-          <label>
-            author:
-            <input
-              type="text"
-              value={author}
-              onChange={(e) => setAuthor(e.target.value)}
-            />
-          </label>
+
+        <div style={{ marginTop: 10 }}>
+          <TextField
+            label="author"
+            value={author}
+            onChange={(e) => setAuthor(e.target.value)}
+          />
         </div>
-        <div>
-          <label>
-            url:
-            <input
-              type="text"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-            />
-          </label>
+
+        <div style={{ marginTop: 10 }}>
+          <TextField
+            label="url"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+          />
         </div>
-        <button type="submit">create</button>
+
+        <Button type="submit" variant="contained" style={{ marginTop: 10 }}>
+          CREATE
+        </Button>
       </form>
     </div>
   )

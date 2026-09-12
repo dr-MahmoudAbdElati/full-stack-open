@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link, Route, Routes, useMatch } from 'react-router-dom'
+import { Container, AppBar, Toolbar, Button, Typography } from '@mui/material'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import BlogForm from './components/BlogFrom'
 import BlogList from './components/BlogList'
 import LoginForm from './components/LoginForm'
+import Notification from './components/Notification'
 
 const normalizeUser = (userData) => ({
   token: userData.token,
@@ -120,25 +122,50 @@ const App = () => {
     }
   }
 
+  const hoverStyle = { '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' } }
+
   return (
-    <>
-      <div>
-        <Link to="/" style={{ padding: 5 }}>
-          blogs
-        </Link>
-        {user === null ? (
-          <Link to="/login" style={{ padding: 5 }}>
-            login
-          </Link>
-        ) : (
-          <>
-            <Link to="/create" style={{ padding: 5 }}>
-              new blog
-            </Link>
-            <button onClick={handleLogout}>logout</button>
-          </>
-        )}
-      </div>
+    <Container>
+      <AppBar position="static">
+        <Toolbar>
+          <Typography variant="h6" sx={{ flexGrow: 1 }}>
+            Blog App
+          </Typography>
+
+          <Button color="inherit" component={Link} to="/" sx={hoverStyle}>
+            BLOGS
+          </Button>
+          {user === null ? (
+            <Button
+              color="inherit"
+              component={Link}
+              to="/login"
+              sx={hoverStyle}
+            >
+              LOGIN
+            </Button>
+          ) : (
+            <>
+              <Button
+                color="inherit"
+                component={Link}
+                to="/create"
+                sx={hoverStyle}
+              >
+                NEW BLOG
+              </Button>
+              <Button color="inherit" sx={hoverStyle} onClick={handleLogout}>
+                LOGOUT
+              </Button>
+            </>
+          )}
+        </Toolbar>
+      </AppBar>
+
+      <Notification
+        notification={notification}
+        setNotification={setNotification}
+      />
 
       <Routes>
         <Route path="/" element={<BlogList blogs={blogs} />} />
@@ -180,7 +207,7 @@ const App = () => {
           }
         />
       </Routes>
-    </>
+    </Container>
   )
 }
 

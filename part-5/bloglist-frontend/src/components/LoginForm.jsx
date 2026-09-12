@@ -1,44 +1,37 @@
-import Notification from './Notification'
+import { Button, TextField } from '@mui/material'
 
 const LoginForm = ({
   handleLogin,
-  notification,
-  setNotification,
   username,
   setUsername,
   password,
   setPassword,
 }) => {
-
   return (
     <>
-      <h2>log in to application</h2>
-      <Notification
-        notification={notification}
-        setNotification={setNotification}
-      />
+      <h2>Log in to application</h2>
+
       <form onSubmit={handleLogin}>
         <div>
-          <label>
-          username
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-          </label>
+          <TextField
+            label="username"
+            variant="standard"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
         </div>
         <div>
-          <label>
-          password
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </label>
+          <TextField
+            label="password"
+            variant="standard"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
         </div>
-        <button type="submit">login</button>
+        <Button type="submit" variant="contained" style={{ marginTop: 10 }}>
+          LOGIN
+        </Button>
       </form>
     </>
   )
